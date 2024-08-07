@@ -1,0 +1,28 @@
+# AWS CodeBuild config
+# This file is referenced in the infra repo as a CodeBuild buildspec target.
+
+# These variables are set in the codebuild project definition's environment secion.
+# ECR_*
+
+version: 0.2
+env:
+  shell: bash
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region "${ECR_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com"
+
+  build:
+    commands:
+      - export ECR_HOST="${ECR_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com"
+      - export ECR_REPO="${ECR_HOST}/${ECR_NAMESPACE}"
+
+      # Skip the test step as it is handle before merge. But re-add if you want more verification
+      # - docker build . -f build/docker/Dockerfile.backend --target test -t backend/core:test
+      # - docker run backend/core:test yarn test
+      - docker build . -f build/docker/Dockerfile--target run -t dw-outofservice:run-candidate
+
+      # Push migration image(s)
+
+      - docker push "${ECR_REPO}/dw-outofservice:run-candidate"
