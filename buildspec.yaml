@@ -18,7 +18,7 @@ phases:
       - export ECR_HOST="${ECR_ACCOUNT_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com"
       - export ECR_REPO="${ECR_HOST}/${ECR_NAMESPACE}"
 
-      - docker build .  -t dw-outofservice:run-candidate
+      - docker build .  -t "${ECR_REPO}/dw-outofservice:run-candidatee"
 
       # Push migration image(s)
 
